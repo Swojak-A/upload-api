@@ -5,12 +5,15 @@ from flask import jsonify, request
 
 app = Flask(__name__)
 
-@app.route("/")
+from models import test_result
+
+@app.route("/", methods=["GET"])
 def index():
 
-	html = "<h3>Upload API!</h3>"
+    test = test_result
 
-	return html
+    return jsonify({"data" : test_result}), 200
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8000, debug=True)
