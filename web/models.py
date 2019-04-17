@@ -1,7 +1,5 @@
 
 
 # mock data
-test_result = [{"language" : "Python",
-                "framework" : "Flask"},
-               {"language" : "Ruby",
-                "framework" : "Rails"}]
+test_result = [{"name" : "Python"},
+               {"name" : "Ruby"}]
