@@ -1,5 +1,6 @@
 #variables files
 .env
 
-
+#IDE files
+.idea
 
