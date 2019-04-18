@@ -13,7 +13,15 @@ app.config.from_object(BaseConfig)
 from models import test_result
 
 
+""" HELPER FUNCTIONS """
 
+def allowed_file(filename):
+	is_allowed = '.' in filename and \
+		   filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+	return is_allowed
+
+
+""" ROUTING """
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -22,6 +30,11 @@ def index():
             abort(400)
 
         file = request.files['file']
+
+        if file.filename == '':
+            abort(400)
+        if not allowed_file(file.filename):
+            abort(400)
 
         if file:
             file = request.files['file']

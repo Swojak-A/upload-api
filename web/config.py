@@ -6,3 +6,4 @@ class BaseConfig(object):
 
 	# FILE SETTINGS
 	UPLOAD_FOLDER = 'uploads'
+	ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
