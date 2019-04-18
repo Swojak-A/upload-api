@@ -9,7 +9,7 @@ import boto3
 
 from config import BaseConfig
 
-from credentials import aws_access_key_id, aws_secret_access_key
+from credentials import aws_access_key_id, aws_secret_access_key, url_bucket
 
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
@@ -59,8 +59,12 @@ def index():
             new_filename = "Image_{}_{}.{}".format(str(100000 + id),
                                                    str(time.time()).replace(".",""),
                                                    filename_ext(file.filename))
+            file_url = "{}{}{}".format(url_bucket,
+                                         'uploads/',
+                                         new_filename)
 
-            newUpload = Upload(filename=new_filename)
+            newUpload = Upload(new_filename,
+                               file_url)
             db.session.add(newUpload)
             db.session.commit()
 
@@ -73,7 +77,11 @@ def index():
                           Body=request.files['file'],
                           Bucket='upload-api-task')
 
-            return jsonify({'filename': new_filename}), 201
+
+
+            return jsonify({'id': newUpload.id,
+                           'filename': new_filename,
+                            'url' : file_url}), 201
 
     return jsonify({'success': 'true'}), 200
 
