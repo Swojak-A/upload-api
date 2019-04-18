@@ -3,7 +3,7 @@
 import os
 from flask import Flask
 from flask import jsonify, request, abort
-from werkzeug.utils import secure_filename
+from flask_sqlalchemy import SQLAlchemy
 import boto3
 
 from config import BaseConfig
@@ -12,6 +12,7 @@ from credentials import aws_access_key_id, aws_secret_access_key
 
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
+db = SQLAlchemy(app)
 
 from models import *
 

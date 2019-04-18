@@ -1,7 +1,10 @@
-
+from credentials import db_key
 
 class BaseConfig(object):
 	SECRET_KEY = 'hi'
+
+	#DB
+	SQLALCHEMY_DATABASE_URI = db_key
 
 
 	# FILE SETTINGS
