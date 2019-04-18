@@ -3,4 +3,8 @@
 
 #IDE files
 .idea
+web/__pycache__
+
+#temp credentials file
+web/credentials.py
 
