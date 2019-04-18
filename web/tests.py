@@ -1,6 +1,7 @@
 import unittest
 from io import BytesIO
 import boto3
+import requests
 
 from app import app
 
@@ -83,8 +84,11 @@ class AppTestCase(unittest.TestCase):
                           aws_secret_access_key=aws_secret_access_key)
         aws_response = s3.list_objects(Prefix='uploads/{}'.format(file_name), Bucket='upload-api-task')
         result = "Contents" in aws_response
-
         self.assertEqual(result, True)
+
+        s = requests.session()
+        img_url_response = s.get(response.json['url'])
+        self.assertEqual(img_url_response.status_code, 200)
 
 
 
