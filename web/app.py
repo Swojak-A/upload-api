@@ -20,9 +20,12 @@ from models import *
 """ HELPER FUNCTIONS """
 
 
+def filename_ext(filename):
+    return filename.rsplit('.', 1)[1].lower()
+
 def allowed_file(filename):
     is_allowed = '.' in filename and \
-                 filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+                 filename_ext(filename) in app.config['ALLOWED_EXTENSIONS']
     return is_allowed
 
 
@@ -47,7 +50,7 @@ def index():
                               aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key)
 
-            new_filename = "file_name.{}".format(file.filename.rsplit('.', 1)[1].lower())
+            new_filename = "file_name.{}".format(filename_ext(file.filename))
 
             # file.seek(0) # in case of botocore.exceptions.ClientError: An error occurred (BadDigest) when ...
             s3.put_object(Key='uploads/{}'.format(new_filename),
