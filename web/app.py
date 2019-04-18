@@ -3,6 +3,10 @@
 import os
 from flask import Flask
 from flask import jsonify, request, abort
+<<<<<<< HEAD
+=======
+from flask_sqlalchemy import SQLAlchemy
+>>>>>>> _feat_connect_to_db
 import boto3
 
 from config import BaseConfig
@@ -11,6 +15,7 @@ from credentials import aws_access_key_id, aws_secret_access_key
 
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
+db = SQLAlchemy(app)
 
 from models import *
 
