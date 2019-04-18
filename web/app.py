@@ -4,13 +4,17 @@ import os
 from flask import Flask
 from flask import jsonify, request, abort
 from werkzeug.utils import secure_filename
+import boto3
 
 from config import BaseConfig
+
+from credentials import aws_access_key_id, aws_secret_access_key
 
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
 
 from models import *
+
 
 """ HELPER FUNCTIONS """
 
@@ -38,13 +42,18 @@ def index():
             abort(400)
 
         if file:
-            file = request.files['file']
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            s3 = boto3.client('s3',
+                              aws_access_key_id=aws_access_key_id,
+                              aws_secret_access_key=aws_secret_access_key)
 
-            return jsonify({"success": "true"}), 201
+            # file.seek(0) # in case of botocore.exceptions.ClientError: An error occurred (BadDigest) when ...
+            s3.put_object(Key='uploads/file_name.jpg',
+                          Body=request.files['file'],
+                          Bucket='upload-api-task')
 
-    return jsonify({"success": "true"}), 200
+            return jsonify({'success': 'true'}), 201
+
+    return jsonify({'success': 'true'}), 200
 
 
 if __name__ == "__main__":
