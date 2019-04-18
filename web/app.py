@@ -47,12 +47,14 @@ def index():
                               aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key)
 
+            new_filename = "file_name.{}".format(file.filename.rsplit('.', 1)[1].lower())
+
             # file.seek(0) # in case of botocore.exceptions.ClientError: An error occurred (BadDigest) when ...
-            s3.put_object(Key='uploads/file_name.jpg',
+            s3.put_object(Key='uploads/{}'.format(new_filename),
                           Body=request.files['file'],
                           Bucket='upload-api-task')
 
-            return jsonify({'success': 'true'}), 201
+            return jsonify({'filename': new_filename}), 201
 
     return jsonify({'success': 'true'}), 200
 
