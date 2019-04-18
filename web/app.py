@@ -46,11 +46,15 @@ def index():
             abort(400)
 
         if file:
+            new_filename = "file_name.{}".format(filename_ext(file.filename))
+
+            newUpload = Upload(filename=new_filename)
+            db.session.add(newUpload)
+            db.session.commit()
+
             s3 = boto3.client('s3',
                               aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key)
-
-            new_filename = "file_name.{}".format(filename_ext(file.filename))
 
             # file.seek(0) # in case of botocore.exceptions.ClientError: An error occurred (BadDigest) when ...
             s3.put_object(Key='uploads/{}'.format(new_filename),
