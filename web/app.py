@@ -3,10 +3,7 @@
 import os
 from flask import Flask
 from flask import jsonify, request, abort
-<<<<<<< HEAD
-=======
 from flask_sqlalchemy import SQLAlchemy
->>>>>>> _feat_connect_to_db
 import boto3
 
 from config import BaseConfig
