@@ -1,26 +1,36 @@
 #!/usr/bin/env python
 
+import os
 from flask import Flask
 from flask import jsonify, request, abort
+from werkzeug.utils import secure_filename
+
+from config import BaseConfig
 
 app = Flask(__name__)
+app.config.from_object(BaseConfig)
 
 from models import test_result
+
+
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        if not request.json:
+        if 'file' not in request.files:
             abort(400)
-        if "name" not in request.json:
-            abort(401)
-        new_test_case = {"name" : request.json["name"]}
-        test_result.append(new_test_case)
-        return jsonify({"data" : test_result}), 201
 
-    test = test_result
+        file = request.files['file']
 
-    return jsonify({"data" : test_result}), 200
+        if file:
+            file = request.files['file']
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            return jsonify({"success": "true"}), 201
+
+    return jsonify({"success": "true"}), 200
 
 
 if __name__ == "__main__":
