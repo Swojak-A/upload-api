@@ -74,13 +74,18 @@ class AppTestCase(unittest.TestCase):
         response = self.app.post('/', data=data,
                                  follow_redirects=True,
                                  content_type='multipart/form-data')
+        self.assertEqual("filename" in response.json, True)
+        self.assertEqual("url" in response.json, True)
+
         file_name = response.json['filename']
         s3 = boto3.client('s3',
                           aws_access_key_id=aws_access_key_id,
                           aws_secret_access_key=aws_secret_access_key)
         aws_response = s3.list_objects(Prefix='uploads/{}'.format(file_name), Bucket='upload-api-task')
         result = "Contents" in aws_response
+
         self.assertEqual(result, True)
+
 
 
 if __name__ == "__main__":
