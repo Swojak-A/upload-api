@@ -3,7 +3,6 @@
 import os
 from flask import Flask
 from flask import jsonify, request, abort
-from werkzeug.utils import secure_filename
 import boto3
 
 from config import BaseConfig
