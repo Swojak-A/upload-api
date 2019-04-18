@@ -31,7 +31,7 @@ class AppTestCase(unittest.TestCase):
     #     self.assertEqual(response.status_code, 400)
 
     def test_upload(self):
-        data = {'file': (BytesIO(b'my file content'), "test_file.jpg")}
+        data = {'file': (BytesIO(b'my file content'), 'test_file.jpg')}
         response = self.app.post('/', data=data,
                                  follow_redirects=True,
                                  content_type='multipart/form-data')
@@ -45,26 +45,29 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_upload_wrong_ext(self):
-        data = {'file' : (BytesIO(b'my file content'), "test_file.exe")}
+        data = {'file' : (BytesIO(b'my file content'), 'test_file.exe')}
         response = self.app.post('/', data=data,
                                 follow_redirects=True,
                                 content_type='multipart/form-data')
         self.assertEqual(response.status_code, 400)
 
     def test_upload_empty_name(self):
-        data = {'file' : (BytesIO(b'my file content'), "")}
+        data = dict(file=(BytesIO(b'my file content'), ''))
         response = self.app.post('/', data=data,
                                 follow_redirects=True,
                                 content_type='multipart/form-data')
         self.assertEqual(response.status_code, 400)
 
     def test_upload_file_too_large(self):
-        data = {'file' : (BytesIO(bytearray(11 * 1024 * 1024)), "too_big.jpg")}
+        data = {'file' : (BytesIO(bytearray(11 * 1024 * 1024)), 'too_big.jpg')}
         response = self.app.post('/', data=data,
                                 follow_redirects=True,
                                 content_type='multipart/form-data')
-        print(response)
         self.assertEqual(response.status_code, 413)
+
+
+
+
 
 if __name__ == "__main__":
     unittest.main()
