@@ -37,6 +37,26 @@ class AppTestCase(unittest.TestCase):
                                  content_type='multipart/form-data')
         self.assertEqual(response.status_code, 201)
 
+    def test_upload_no_file(self):
+        data = {}
+        response = self.app.post('/', data=data,
+                                 follow_redirects=True,
+                                 content_type='multipart/form-data')
+        self.assertEqual(response.status_code, 400)
+
+    def test_upload_wrong_ext(self):
+        data = {'file' : (BytesIO(b'my file content'), "test_file.exe")}
+        response = self.app.post('/', data=data,
+                                follow_redirects=True,
+                                content_type='multipart/form-data')
+        self.assertEqual(response.status_code, 400)
+
+    def test_upload_empty_name(self):
+        data = {'file' : (BytesIO(b'my file content'), "")}
+        response = self.app.post('/', data=data,
+                                follow_redirects=True,
+                                content_type='multipart/form-data')
+        self.assertEqual(response.status_code, 400)
 
 
 
