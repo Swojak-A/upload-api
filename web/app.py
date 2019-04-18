@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import time
 from flask import Flask
 from flask import jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
@@ -46,7 +47,18 @@ def index():
             abort(400)
 
         if file:
-            new_filename = "file_name.{}".format(filename_ext(file.filename))
+            lastUpload = Upload.query.order_by(Upload.id.desc()).first()
+
+            if lastUpload == None:
+                id = 1
+            else:
+                id = lastUpload.id + 1
+
+
+
+            new_filename = "Image_{}_{}.{}".format(str(100000 + id),
+                                                   str(time.time()).replace(".",""),
+                                                   filename_ext(file.filename))
 
             newUpload = Upload(filename=new_filename)
             db.session.add(newUpload)
