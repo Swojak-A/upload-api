@@ -10,18 +10,19 @@ from config import BaseConfig
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
 
-from models import test_result
-
+from models import *
 
 """ HELPER FUNCTIONS """
 
+
 def allowed_file(filename):
-	is_allowed = '.' in filename and \
-		   filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-	return is_allowed
+    is_allowed = '.' in filename and \
+                 filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+    return is_allowed
 
 
 """ ROUTING """
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
