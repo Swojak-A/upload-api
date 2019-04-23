@@ -90,41 +90,47 @@ class AppTestCase(unittest.TestCase):
     """ UPLOAD tests """
 
     def test_if_file_exists_files(self):
-        original_filename = 'test.jpg'
-        file = create_test_image(filename=original_filename)
-        data = {'file': file}
-        response = self.app.post('/', data=data,
-                                 follow_redirects=True,
-                                 content_type='multipart/form-data')
+        test_cases = ['test.jpg',
+                      'test.jpeg',
+                      'test.png',
+                      'test.gif']
 
-        # test json response
-        self.assertEqual("filename" in response.json, True)
-        self.assertEqual("url" in response.json, True)
+        for f in test_cases:
+            original_filename = f
+            file = create_test_image(filename=original_filename)
+            data = {'file': file}
+            response = self.app.post('/', data=data,
+                                     follow_redirects=True,
+                                     content_type='multipart/form-data')
 
-        # test if file exists on s3
-        filename = response.json['filename']
-        s3 = boto3.client('s3',
-                          aws_access_key_id=aws_access_key_id,
-                          aws_secret_access_key=aws_secret_access_key)
-        aws_response = s3.list_objects(Prefix='uploads/{}'.format(filename),
-                                       Bucket='upload-api-task')
-        result = "Contents" in aws_response
-        self.assertEqual(result, True)
+            # test json response
+            self.assertEqual("filename" in response.json, True)
+            self.assertEqual("url" in response.json, True)
 
-        # test url
-        s = requests.session()
-        img_url_response = s.get(response.json['url'])
-        self.assertEqual(img_url_response.status_code, 200)
+            # test if file exists on s3
+            filename = response.json['filename']
+            s3 = boto3.client('s3',
+                              aws_access_key_id=aws_access_key_id,
+                              aws_secret_access_key=aws_secret_access_key)
+            aws_response = s3.list_objects(Prefix='uploads/{}'.format(filename),
+                                           Bucket='upload-api-task')
+            result = "Contents" in aws_response
+            self.assertEqual(result, True)
 
-        # test db values
-        testUpload = Upload.query.filter_by(filename=response.json['filename']).one()
-        self.assertEqual(response.json['url'], testUpload.url)
-        self.assertEqual(original_filename, testUpload.original_filename)
-        self.assertEqual(create_test_image(filename=original_filename).read(), testUpload.file)
+            # test url
+            s = requests.session()
+            img_url_response = s.get(response.json['url'])
+            self.assertEqual(img_url_response.status_code, 200)
 
-        # test resize
-        img = Image.open(BytesIO(img_url_response.content))
-        self.assertEqual(img.size, (400, 300))
+            # test db values
+            testUpload = Upload.query.filter_by(filename=response.json['filename']).one()
+            self.assertEqual(response.json['url'], testUpload.url)
+            self.assertEqual(original_filename, testUpload.original_filename)
+            self.assertEqual(create_test_image(filename=original_filename).read(), testUpload.file)
+
+            # test resize
+            img = Image.open(BytesIO(img_url_response.content))
+            self.assertEqual(img.size, (400, 300))
 
 
 
