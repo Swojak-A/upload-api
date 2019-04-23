@@ -154,6 +154,25 @@ class AppTestCase(unittest.TestCase):
 
             self.assertEqual(test_cases[size], response.status_code)
 
+    def test_output_size(self):
+        test_cases = {'medium': (400, 300),
+                      'small': (120, 90)}
+
+        for size_param in test_cases:
+            file = create_test_image(filename='test.jpg')
+            data = {'file': file}
+            response = self.app.post('/?size={}'.format(size_param), data=data,
+                                     follow_redirects=True,
+                                     content_type='multipart/form-data')
+
+            s = requests.session()
+            img_url_response = s.get(response.json['url'])
+            self.assertEqual(img_url_response.status_code, 200)
+
+            img = Image.open(BytesIO(img_url_response.content))
+            self.assertEqual(img.size, test_cases[size_param])
+
+
 
 if __name__ == "__main__":
     unittest.main()
