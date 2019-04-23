@@ -70,14 +70,18 @@ class AppTestCase(unittest.TestCase):
 
     """ UPLOAD TESTS """
 
-    def test_if_file_exists_on_s3(self):
-        data = {'file': (BytesIO(b'my file content'), 'test_file.jpg')}
+    def test_if_file_exists_files(self):
+        file_content = BytesIO(b'my file content')
+        data = {'file': (file_content, 'test_file.jpg')}
         response = self.app.post('/', data=data,
                                  follow_redirects=True,
                                  content_type='multipart/form-data')
+
+        # test json response
         self.assertEqual("filename" in response.json, True)
         self.assertEqual("url" in response.json, True)
 
+        # test if file exists on s3
         file_name = response.json['filename']
         s3 = boto3.client('s3',
                           aws_access_key_id=aws_access_key_id,
@@ -86,6 +90,7 @@ class AppTestCase(unittest.TestCase):
         result = "Contents" in aws_response
         self.assertEqual(result, True)
 
+        # test url
         s = requests.session()
         img_url_response = s.get(response.json['url'])
         self.assertEqual(img_url_response.status_code, 200)
