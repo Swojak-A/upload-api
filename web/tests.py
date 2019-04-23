@@ -132,6 +132,27 @@ class AppTestCase(unittest.TestCase):
             img = Image.open(BytesIO(img_url_response.content))
             self.assertEqual(img.size, (400, 300))
 
+    """ RESIZE tests """
+
+    def test_input_size(self):
+        test_cases = {(401, 301):201,
+                      (401, 300): 201,
+                      (401, 299): 422,
+                      (400, 301): 201,
+                      (400, 300): 201,
+                      (400, 299): 422,
+                      (399, 301): 422,
+                      (399, 300): 422,
+                      (399, 299): 422}
+
+        for size in test_cases:
+            file = create_test_image(filename='test.jpg', size=size)
+            data = {'file': file}
+            response = self.app.post('/', data=data,
+                                     follow_redirects=True,
+                                     content_type='multipart/form-data')
+
+            self.assertEqual(test_cases[size], response.status_code)
 
 
 if __name__ == "__main__":
