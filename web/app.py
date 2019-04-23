@@ -11,7 +11,9 @@ from io import BytesIO
 
 from config import BaseConfig
 
-from credentials import aws_access_key_id, aws_secret_access_key, url_bucket
+aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
+aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
+bucket_url = os.environ['BUCKET_URL']
 
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
@@ -61,7 +63,7 @@ def index():
             new_filename = "Image_{}_{}.{}".format(str(100000 + id),
                                                    str(time.time()).replace(".",""),
                                                    filename_ext(file.filename))
-            file_url = "{}{}{}".format(url_bucket,
+            file_url = "{}{}{}".format(bucket_url,
                                          'uploads/',
                                          new_filename)
 
@@ -125,4 +127,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=8000)
