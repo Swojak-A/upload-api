@@ -3,7 +3,8 @@ from io import BytesIO
 import boto3
 import requests
 
-from app import app
+from app import app, db
+from models import *
 
 from credentials import aws_access_key_id, aws_secret_access_key
 
@@ -72,7 +73,8 @@ class AppTestCase(unittest.TestCase):
 
     def test_if_file_exists_files(self):
         file_content = BytesIO(b'my file content')
-        data = {'file': (file_content, 'test_file.jpg')}
+        original_file_name = 'test_file.jpg'
+        data = {'file': (file_content, original_file_name)}
         response = self.app.post('/', data=data,
                                  follow_redirects=True,
                                  content_type='multipart/form-data')
@@ -95,6 +97,11 @@ class AppTestCase(unittest.TestCase):
         img_url_response = s.get(response.json['url'])
         self.assertEqual(img_url_response.status_code, 200)
 
+        # test db values
+        testUpload = Upload.query.filter_by(filename=response.json['filename']).one()
+        self.assertEqual(response.json['url'], testUpload.url)
+        self.assertEqual(original_file_name, testUpload.original_filename)
+        self.assertEqual(BytesIO(b'my file content').read(), testUpload.file)
 
 
 if __name__ == "__main__":
