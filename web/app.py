@@ -42,14 +42,14 @@ def index():
     if request.method == "POST":
         # check for correct request
         if 'file' not in request.files:
-            abort(400)
+            return jsonify({"status": "error: no file detected"}), 400
 
         file = request.files['file']
 
         if file.filename == '':
-            abort(400)
+            return jsonify({"status": "error: empty filename detected"}), 400
         if not allowed_file(file.filename):
-            abort(400)
+            return jsonify({"status": "error: file with that extensions are not allowed"}), 400
 
         # if input correct
         if file:
@@ -84,17 +84,17 @@ def index():
                     elif size_param.lower() == 'medium':
                         size = medium_size
                     else:
-                        abort(400)
+                        return jsonify({"status": "error: values 'medium' and 'small' are only ones allowed for 'size' key"}), 400
                 else:
                     size = medium_size
 
                 if img.size[0] >= size[0] and img.size[1] >= size[1]:
                     img = ImageOps.fit(img, size, method=Image.ANTIALIAS, centering=(0.5, 0.5))
                 else:
-                    abort(422)
+                    return jsonify({"status": "error: file is too small resize it"}), 422
 
             except OSError as err: # OSError catches files that have corrupted content, but proper ext
-                abort(422)
+                return jsonify({"status": "error: the file is corrupted or is not a proper image file"}), 422
             except Exception as err:
                 raise err
 
@@ -120,11 +120,12 @@ def index():
                           Bucket='upload-api-task')
 
             # returning succesfull response
-            return jsonify({'id': newUpload.id,
-                           'filename': new_filename,
-                            'url' : file_url}), 201
+            return jsonify({"status": "success",
+                            "id": newUpload.id,
+                           "filename": new_filename,
+                            "url" : file_url}), 201
 
-    return jsonify({'success': 'true'}), 200
+    return jsonify({"status": "success"}), 200
 
 
 if __name__ == "__main__":
