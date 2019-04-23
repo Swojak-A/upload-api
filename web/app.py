@@ -6,7 +6,7 @@ from flask import Flask
 from flask import jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 import boto3
-from PIL import Image
+from PIL import Image, ImageOps
 from io import BytesIO
 
 from config import BaseConfig
@@ -69,6 +69,14 @@ def index():
 
             try:
                 img = Image.open(file)
+
+                medium_size = (400, 300)
+                small_size = (120, 90)
+
+                if img.size[0] >= medium_size[0] or img.size[1] >= medium_size[1]:
+                    img = ImageOps.fit(img, (400, 300), method=Image.ANTIALIAS, centering=(0.5, 0.5))
+                else:
+                    abort(422)
 
             except OSError as err: # OSError catches files that have corrupted content, but proper ext
                 abort(422)
