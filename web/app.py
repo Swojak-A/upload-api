@@ -63,8 +63,12 @@ def index():
                                          'uploads/',
                                          new_filename)
 
-            newUpload = Upload(new_filename,
-                               file_url)
+            file_content = file.read()
+
+            newUpload = Upload(filename=new_filename,
+                               url=file_url,
+                               original_filename=file.filename,
+                               file=file_content)
             db.session.add(newUpload)
             db.session.commit()
 
@@ -72,9 +76,9 @@ def index():
                               aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key)
 
-            # file.seek(0) # in case of botocore.exceptions.ClientError: An error occurred (BadDigest) when ...
+            # file_content.seek(0) # in case of botocore.exceptions.ClientError: An error occurred (BadDigest) when ...
             s3.put_object(Key='uploads/{}'.format(new_filename),
-                          Body=request.files['file'],
+                          Body=file_content,
                           Bucket='upload-api-task')
 
 
