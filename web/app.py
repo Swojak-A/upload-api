@@ -73,8 +73,19 @@ def index():
                 medium_size = (400, 300)
                 small_size = (120, 90)
 
-                if img.size[0] >= medium_size[0] and img.size[1] >= medium_size[1]:
-                    img = ImageOps.fit(img, (400, 300), method=Image.ANTIALIAS, centering=(0.5, 0.5))
+                if 'size' in request.args:
+                    size_param = request.args.get('size')
+                    if size_param.lower() == 'small':
+                        size = small_size
+                    elif size_param.lower() == 'medium':
+                        size = medium_size
+                    else:
+                        abort(400)
+                else:
+                    size = medium_size
+
+                if img.size[0] >= size[0] and img.size[1] >= size[1]:
+                    img = ImageOps.fit(img, size, method=Image.ANTIALIAS, centering=(0.5, 0.5))
                 else:
                     abort(422)
 
@@ -83,13 +94,13 @@ def index():
             except Exception as err:
                 raise err
 
+
             newUpload = Upload(filename=new_filename,
                                url=file_url,
                                original_filename=file.filename,
                                file=file_content)
             db.session.add(newUpload)
             db.session.commit()
-
 
 
             s3 = boto3.client('s3',
