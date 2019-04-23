@@ -40,6 +40,7 @@ def allowed_file(filename):
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+        # check for correct request
         if 'file' not in request.files:
             abort(400)
 
@@ -50,15 +51,15 @@ def index():
         if not allowed_file(file.filename):
             abort(400)
 
+        # if input correct
         if file:
+            # preparing data for db record
             lastUpload = Upload.query.order_by(Upload.id.desc()).first()
 
             if lastUpload == None:
                 id = 1
             else:
                 id = lastUpload.id + 1
-
-
 
             new_filename = "Image_{}_{}.{}".format(str(100000 + id),
                                                    str(time.time()).replace(".",""),
@@ -69,6 +70,7 @@ def index():
 
             file_content = file.read()
 
+            # resizing file
             try:
                 img = Image.open(file)
 
@@ -96,7 +98,7 @@ def index():
             except Exception as err:
                 raise err
 
-
+            # writing record to db
             newUpload = Upload(filename=new_filename,
                                url=file_url,
                                original_filename=file.filename,
@@ -104,7 +106,7 @@ def index():
             db.session.add(newUpload)
             db.session.commit()
 
-
+            # uploading file to aws s3
             s3 = boto3.client('s3',
                               aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key)
@@ -117,8 +119,7 @@ def index():
                           Body=out_img,
                           Bucket='upload-api-task')
 
-
-
+            # returning succesfull response
             return jsonify({'id': newUpload.id,
                            'filename': new_filename,
                             'url' : file_url}), 201
