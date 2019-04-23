@@ -134,7 +134,7 @@ class AppTestCase(unittest.TestCase):
 
     """ RESIZE tests """
 
-    def test_input_size(self):
+    def test_input_size_conditioning(self):
         test_cases = {(401, 301):201,
                       (401, 300): 201,
                       (401, 299): 422,
