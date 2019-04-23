@@ -30,10 +30,14 @@ def create_test_image(filename='test.jpg', size=(500, 500)):
 class AppTestCase(unittest.TestCase):
 
     def setUp(self):
+        """Set up a blank temp database before each test"""
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['DEBUG'] = False
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{}'.format(os.environ['TEST_DB_KEY'])
         self.app = app.test_client()
+        db.drop_all()
+        db.create_all()
 
 
     """ GET test """
@@ -123,6 +127,7 @@ class AppTestCase(unittest.TestCase):
             s = requests.session()
             img_url_response = s.get(response.json['url'])
             self.assertEqual(img_url_response.status_code, 200)
+            s.close()
 
             # test db values
             testUpload = Upload.query.filter_by(filename=response.json['filename']).one()
@@ -172,8 +177,15 @@ class AppTestCase(unittest.TestCase):
             self.assertEqual(img_url_response.status_code, 200)
 
             img = Image.open(BytesIO(img_url_response.content))
+            s.close()
             self.assertEqual(img.size, test_cases[size_param])
 
+
+    def tearDown(self):
+        """Destroy blank temp database after each test"""
+        db.session.commit()
+        db.drop_all()
+        db.session.close()
 
 if __name__ == "__main__":
     unittest.main()
