@@ -122,6 +122,11 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(original_filename, testUpload.original_filename)
         self.assertEqual(create_test_image(filename=original_filename).read(), testUpload.file)
 
+        # test resize
+        img = Image.open(BytesIO(img_url_response.content))
+        self.assertEqual(img.size, (400, 300))
+
+
 
 if __name__ == "__main__":
     unittest.main()
