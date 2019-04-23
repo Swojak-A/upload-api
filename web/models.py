@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from app import db
 
 
@@ -9,9 +9,6 @@ class Upload(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String, nullable=False)
     url = db.Column(db.String, nullable=False)
-    date_uploaded = db.Column(db.DateTime, nullable=False)
-
-    def __init__(self, filename, url):
-        self.filename = filename
-        self.url = url
-        self.date_uploaded = datetime.datetime.now()
+    original_filename = db.Column(db.String, nullable=False) # FileStorage werkzeug object has problems being pickled
+    file = db.Column(db.LargeBinary, nullable=False) # so we save orig name as string and file itself as BLOB
+    date_uploaded = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
