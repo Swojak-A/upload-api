@@ -1,4 +1,5 @@
 import unittest
+import os
 from io import BytesIO
 from PIL import Image
 import boto3
@@ -7,8 +8,8 @@ import requests
 from app import app, db, filename_ext
 from models import *
 
-from credentials import aws_access_key_id, aws_secret_access_key
-
+aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
+aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
 
 
 """ HELPER functions """
@@ -33,6 +34,7 @@ class AppTestCase(unittest.TestCase):
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['DEBUG'] = False
         self.app = app.test_client()
+
 
     """ GET test """
 
@@ -81,7 +83,7 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_upload_file_too_large(self):
-        data = {'file' : (BytesIO(bytearray(11 * 1024 * 1024)), 'too_big.jpg')}
+        data = {'file' : (BytesIO(bytearray(6 * 1024 * 1024)), 'too_big.jpg')}
         response = self.app.post('/', data=data,
                                 follow_redirects=True,
                                 content_type='multipart/form-data')
@@ -171,7 +173,6 @@ class AppTestCase(unittest.TestCase):
 
             img = Image.open(BytesIO(img_url_response.content))
             self.assertEqual(img.size, test_cases[size_param])
-
 
 
 if __name__ == "__main__":
