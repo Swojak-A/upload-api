@@ -5,6 +5,9 @@
 .idea
 web/__pycache__
 
+#git files
+web/app.py.orig
+
 #temp credentials file
 web/credentials.py
 
