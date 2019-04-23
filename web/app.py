@@ -6,6 +6,8 @@ from flask import Flask
 from flask import jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 import boto3
+from PIL import Image
+from io import BytesIO
 
 from config import BaseConfig
 
@@ -65,6 +67,14 @@ def index():
 
             file_content = file.read()
 
+            try:
+                img = Image.open(file)
+
+            except OSError as err: # OSError catches files that have corrupted content, but proper ext
+                abort(422)
+            except Exception as err:
+                raise err
+
             newUpload = Upload(filename=new_filename,
                                url=file_url,
                                original_filename=file.filename,
@@ -72,13 +82,18 @@ def index():
             db.session.add(newUpload)
             db.session.commit()
 
+
+
             s3 = boto3.client('s3',
                               aws_access_key_id=aws_access_key_id,
                               aws_secret_access_key=aws_secret_access_key)
 
-            # file_content.seek(0) # in case of botocore.exceptions.ClientError: An error occurred (BadDigest) when ...
+            out_img = BytesIO()
+            img.save(out_img, filename_ext(new_filename).replace('jpg', 'jpeg')) # PIL only accepts "JPEG" file format
+
+            out_img.seek(0) # in case of botocore.exceptions.ClientError: An error occurred (BadDigest) when ...
             s3.put_object(Key='uploads/{}'.format(new_filename),
-                          Body=file_content,
+                          Body=out_img,
                           Bucket='upload-api-task')
 
 
