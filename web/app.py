@@ -73,7 +73,7 @@ def index():
                 medium_size = (400, 300)
                 small_size = (120, 90)
 
-                if img.size[0] >= medium_size[0] or img.size[1] >= medium_size[1]:
+                if img.size[0] >= medium_size[0] and img.size[1] >= medium_size[1]:
                     img = ImageOps.fit(img, (400, 300), method=Image.ANTIALIAS, centering=(0.5, 0.5))
                 else:
                     abort(422)
