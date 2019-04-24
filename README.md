@@ -4,7 +4,7 @@ Example repo of REST API for resizing image files & uploading them to AWS S3.
 Quick summary:
 - Accepted file formats: `jpg`, `jpeg`, `gif`, `png`.
 - Accepted file size: < 5 mb. (can be changed in config)
-- accepted route: `/`
+- Accepted route: `/`
 - GET request returns simple JSON confirming success
 - POST requests allow to upload a file, which will then be resized and sent to AWS S3 storage.
 - POST requests should be in `form-data` format with `file` in key and file attached to value.
