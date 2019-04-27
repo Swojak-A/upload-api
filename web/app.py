@@ -5,6 +5,7 @@ import time
 from flask import Flask
 from flask import jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
+from flask_httpauth import HTTPBasicAuth
 import boto3
 from PIL import Image, ImageOps
 from io import BytesIO
@@ -18,6 +19,8 @@ bucket_url = os.environ['BUCKET_URL']
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
 db = SQLAlchemy(app)
+
+auth = HTTPBasicAuth()
 
 from models import *
 
@@ -34,10 +37,30 @@ def allowed_file(filename):
     return is_allowed
 
 
+""" AUTH FUNCTIONS """
+
+
+@auth.get_password
+def get_password(input_username):
+    username = os.environ['AUTH_USER']
+    password = os.environ['AUTH_PASS']
+
+    if input_username == username:
+        return password
+    return None
+
+@auth.error_handler
+def unauthorized():
+    return jsonify({'status': 'error: unauthorized access'}), 401
+
+
+
+
 """ ROUTING """
 
 
 @app.route("/", methods=["GET", "POST"])
+@auth.login_required
 def index():
     if request.method == "POST":
         # check if request is correct
