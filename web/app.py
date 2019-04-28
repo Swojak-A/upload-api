@@ -145,8 +145,9 @@ def index():
             # return a succesfull response
             return jsonify({"status": "success",
                             "id": newUpload.id,
-                           "filename": new_filename,
-                            "url" : file_url}), 201
+                            "filename": new_filename,
+                            "url": file_url,
+                            "original_filename": file.filename}), 201
 
     return jsonify({"status": "success"}), 200
 
