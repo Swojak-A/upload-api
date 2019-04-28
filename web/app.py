@@ -124,8 +124,8 @@ def index():
             # write record to db
             newUpload = Upload(filename=new_filename,
                                url=file_url,
-                               original_filename=file.filename,
-                               file=file_content)
+                               original_filename=file.filename)
+                               # file=file_content) # we temporarily don't save orig file content due to limited db capacity
             db.session.add(newUpload)
             db.session.commit()
 

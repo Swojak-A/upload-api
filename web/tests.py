@@ -153,7 +153,8 @@ class AppTestCase(unittest.TestCase):
             self.assertEqual(response.json['url'], testUpload.url)
             self.assertEqual(original_filename, testUpload.original_filename)
             self.assertEqual(response.json['original_filename'], testUpload.original_filename)
-            self.assertEqual(create_test_image(filename=original_filename).read(), testUpload.file)
+            # we temporarily don't save original file content due to limited db capacity - so testing would be redundant for now
+            # self.assertEqual(create_test_image(filename=original_filename).read(), testUpload.file)
 
             # test resize
             img = Image.open(BytesIO(img_url_response.content))
