@@ -152,6 +152,7 @@ class AppTestCase(unittest.TestCase):
             testUpload = Upload.query.filter_by(filename=response.json['filename']).one()
             self.assertEqual(response.json['url'], testUpload.url)
             self.assertEqual(original_filename, testUpload.original_filename)
+            self.assertEqual(response.json['original_filename'], testUpload.original_filename)
             self.assertEqual(create_test_image(filename=original_filename).read(), testUpload.file)
 
             # test resize
