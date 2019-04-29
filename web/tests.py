@@ -4,6 +4,7 @@ from io import BytesIO
 from PIL import Image
 import boto3
 import requests
+from base64 import b64encode
 
 from app import app, db, filename_ext
 from models import *
@@ -23,6 +24,16 @@ def create_test_image(filename='test.jpg', size=(500, 500)):
     file.seek(0)
     return file
 
+def auth_head():
+    username = os.environ['AUTH_USER']
+    password = os.environ['AUTH_PASS']
+
+    str_form = "{}:{}".format(username, password)
+    b_form = str.encode(str_form)
+    headers = {
+        'Authorization': 'Basic %s' % b64encode(b_form).decode("ascii")
+    }
+    return headers
 
 
 """ TEST CASES """
@@ -43,7 +54,9 @@ class AppTestCase(unittest.TestCase):
     """ GET test """
 
     def test_index_get(self):
-        response = self.app.get('/', follow_redirects=True)
+        response = self.app.get('/',
+                                headers=auth_head(),
+                                follow_redirects=True)
         self.assertEqual(response.status_code, 200)
 
     """ POST tests """
@@ -61,6 +74,7 @@ class AppTestCase(unittest.TestCase):
     def test_upload(self):
         data = {'file': create_test_image()}
         response = self.app.post('/', data=data,
+                                 headers=auth_head(),
                                  follow_redirects=True,
                                  content_type='multipart/form-data')
         self.assertEqual(response.status_code, 201)
@@ -68,6 +82,7 @@ class AppTestCase(unittest.TestCase):
     def test_upload_no_file(self):
         data = {}
         response = self.app.post('/', data=data,
+                                 headers=auth_head(),
                                  follow_redirects=True,
                                  content_type='multipart/form-data')
         self.assertEqual(response.status_code, 400)
@@ -75,22 +90,25 @@ class AppTestCase(unittest.TestCase):
     def test_upload_wrong_ext(self):
         data = {'file' : (BytesIO(b'my file content'), 'test_file.exe')}
         response = self.app.post('/', data=data,
-                                follow_redirects=True,
-                                content_type='multipart/form-data')
+                                 headers=auth_head(),
+                                 follow_redirects=True,
+                                 content_type='multipart/form-data')
         self.assertEqual(response.status_code, 400)
 
     def test_upload_empty_name(self):
         data = dict(file=(BytesIO(b'my file content'), ''))
         response = self.app.post('/', data=data,
-                                follow_redirects=True,
-                                content_type='multipart/form-data')
+                                 headers=auth_head(),
+                                 follow_redirects=True,
+                                 content_type='multipart/form-data')
         self.assertEqual(response.status_code, 400)
 
     def test_upload_file_too_large(self):
         data = {'file' : (BytesIO(bytearray(6 * 1024 * 1024)), 'too_big.jpg')}
         response = self.app.post('/', data=data,
-                                follow_redirects=True,
-                                content_type='multipart/form-data')
+                                 headers=auth_head(),
+                                 follow_redirects=True,
+                                 content_type='multipart/form-data')
         self.assertEqual(response.status_code, 413)
 
     """ UPLOAD tests """
@@ -106,6 +124,7 @@ class AppTestCase(unittest.TestCase):
             file = create_test_image(filename=original_filename)
             data = {'file': file}
             response = self.app.post('/', data=data,
+                                     headers=auth_head(),
                                      follow_redirects=True,
                                      content_type='multipart/form-data')
 
@@ -133,7 +152,9 @@ class AppTestCase(unittest.TestCase):
             testUpload = Upload.query.filter_by(filename=response.json['filename']).one()
             self.assertEqual(response.json['url'], testUpload.url)
             self.assertEqual(original_filename, testUpload.original_filename)
-            self.assertEqual(create_test_image(filename=original_filename).read(), testUpload.file)
+            self.assertEqual(response.json['original_filename'], testUpload.original_filename)
+            # we temporarily don't save original file content due to limited db capacity - so testing would be redundant for now
+            # self.assertEqual(create_test_image(filename=original_filename).read(), testUpload.file)
 
             # test resize
             img = Image.open(BytesIO(img_url_response.content))
@@ -156,6 +177,7 @@ class AppTestCase(unittest.TestCase):
             file = create_test_image(filename='test.jpg', size=size)
             data = {'file': file}
             response = self.app.post('/', data=data,
+                                     headers=auth_head(),
                                      follow_redirects=True,
                                      content_type='multipart/form-data')
 
@@ -169,6 +191,7 @@ class AppTestCase(unittest.TestCase):
             file = create_test_image(filename='test.jpg')
             data = {'file': file}
             response = self.app.post('/?size={}'.format(size_param), data=data,
+                                     headers=auth_head(),
                                      follow_redirects=True,
                                      content_type='multipart/form-data')
 

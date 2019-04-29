@@ -10,5 +10,5 @@ class Upload(db.Model):
     filename = db.Column(db.String, nullable=False)
     url = db.Column(db.String, nullable=False)
     original_filename = db.Column(db.String, nullable=False) # FileStorage werkzeug object has problems being pickled
-    file = db.Column(db.LargeBinary, nullable=False) # so we save orig name as string and file itself as BLOB
+    file = db.Column(db.LargeBinary, nullable=True) # so we save orig name as string and file itself as BLOB
     date_uploaded = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
